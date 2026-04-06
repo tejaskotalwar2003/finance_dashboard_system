@@ -13,6 +13,17 @@ This is a FastAPI backend project that manages financial records with role-based
   - Category-wise analysis
   - Monthly trends
 
+### Configure Database Credentials
+
+Update the database configuration in your project before running:
+
+```python
+DB_USER = "Enter your username"
+DB_PASSWORD = "Enter your password"
+DB_HOST = "localhost"
+DB_NAME = "finance_db"
+```
+
 ## Tech Stack
 - FastAPI
 - PostgreSQL
