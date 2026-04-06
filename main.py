@@ -18,7 +18,7 @@ security = HTTPBearer()
 
 Base.metadata.create_all(bind=engine)
 
-# ---------------- DB ----------------
+#  DATABASE
 def get_db():
     db = SessionLocal()
     try:
@@ -26,7 +26,7 @@ def get_db():
     finally:
         db.close()
 
-# ---------------- AUTH ----------------
+#  AUTHENTICATION
 SECRET_KEY = "mysecretkey"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -45,12 +45,12 @@ def create_token(data: dict):
     data["exp"] = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
-# ---------------- LOGIN REQUEST ----------------
+#  LOGIN REQUEST 
 class LoginRequest(BaseModel):
     email: str
     password: str
 
-# ---------------- CURRENT USER ----------------
+#  CURRENT USER 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
@@ -73,7 +73,7 @@ def get_current_user(
     except:
         raise HTTPException(status_code=401, detail="Token expired or invalid")
 
-# ---------------- ROLE CHECK ----------------
+# ROLE CHECK 
 def admin_only(user):
     if user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
@@ -83,12 +83,12 @@ def analyst_or_admin(user):
         raise HTTPException(status_code=403, detail="Not allowed")
 
 
-
+# Home
 @app.get("/")
 def home_page():
     return {"Message": "Welcome to my project by adding /docs in url "}
 
-# ---------------- LOGIN ----------------
+# LOGIN 
 @app.post("/login")
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == data.email).first()
@@ -100,7 +100,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
     return {"access_token": token}
 
-# ---------------- USERS ----------------
+# USERS
 @app.post("/create-users", response_model=schemas.UserResponse)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
@@ -124,13 +124,13 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     return new_user
 
-
+# SHOW USERS
 @app.get("/users", response_model=list[schemas.UserResponse])
 def get_users(user = Depends(get_current_user), db: Session = Depends(get_db)): 
     admin_only(user)
     return db.query(models.User).all()
 
-# ---------------- RECORDS ----------------
+# RECORDS
 @app.post("/records", response_model=schemas.RecordResponse)
 def create_record(
     record: schemas.RecordCreate,
@@ -160,7 +160,7 @@ def get_records(
     analyst_or_admin(user)
     return db.query(models.Record).offset(skip).limit(limit).all()
 
-# ---------------- FILTER ----------------
+#  FILTER 
 @app.get("/filter-records", response_model=list[schemas.RecordResponse])
 def filter_records(
     db: Session = Depends(get_db),
@@ -187,8 +187,8 @@ def filter_records(
         query = query.filter(models.Record.date <= end_date)
 
     return query.all()
-
-# UPDATE
+ 
+# UPDATE RECORD
 @app.put("/records/{record_id}", response_model=schemas.RecordResponse)
 def update_record(
     record_id: int,
@@ -226,7 +226,7 @@ def update_record(
 
     return r
 
-# ---------------- DELETE ----------------
+#DELETE RECORD
 @app.delete("/records/{record_id}")
 def delete_record(
     record_id: int,
@@ -245,16 +245,15 @@ def delete_record(
 
     return {"message": "Deleted"}
 
-# ---------------- DASHBOARD ----------------
-# ---------------- ROLE CHECK ----------------
+# ROLE CHECK 
 def viewer_access(user):
     if user.role not in ["admin", "analyst", "viewer"]:
         raise HTTPException(status_code=403, detail="Not allowed")
 
 
-# ---------------- DASHBOARD ----------------
+#  DASHBOARD 
 
-# ✅ Summary (Optimized)
+# Summary
 @app.get("/summary")
 def summary(
     db: Session = Depends(get_db),
@@ -283,7 +282,7 @@ def summary(
     }
 
 
-# ✅ Recent Transactions (Improved)
+# Recent Transactions
 @app.get("/recent", response_model=list[schemas.RecordResponse])
 def recent(
     limit: int = 5,
@@ -301,7 +300,7 @@ def recent(
         .all()
 
 
-# ✅ Category-wise Summary
+# Category-wise Summary
 @app.get("/category-summary")
 def category_summary(
     db: Session = Depends(get_db),
@@ -320,7 +319,7 @@ def category_summary(
     ]
 
 
-# ✅ Monthly Summary (Trend)
+# Monthly Summary (Trend)
 from sqlalchemy import extract
 
 @app.get("/monthly-summary")
