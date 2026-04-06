@@ -5,8 +5,8 @@ from sqlalchemy.orm import sessionmaker
 
 # DB config
 DB_NAME = "finance_db"
-DB_USER = "postgres"
-DB_PASSWORD = "postgresql"
+DB_USER = "Enter your username"
+DB_PASSWORD = "Enter your password"
 DB_HOST = "localhost"
 
 # Step 1: connect to default postgres database
