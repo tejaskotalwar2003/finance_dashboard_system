@@ -23,7 +23,7 @@ with default_engine.connect() as conn:
 
     if not result.scalar():
         conn.execute(text(f'CREATE DATABASE {DB_NAME}'))
-        print("✅ Database created successfully")
+        print(" Database created successfully")
 
 # Step 3: connect to your actual database
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
